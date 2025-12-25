@@ -1,6 +1,7 @@
 import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import { isDevelopment } from './config/env.js';
+import { pdfRoutes } from './routes/pdf.routes.js';
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -23,6 +24,9 @@ export async function buildApp(): Promise<FastifyInstance> {
     origin: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
   });
+
+  // Register routes
+  await app.register(pdfRoutes);
 
   // Root route
   app.get('/', async () => {
