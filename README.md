@@ -109,6 +109,31 @@ Content-Type: application/json
 }
 ```
 
+#### Generate PDF with Loading Rules
+
+```bash
+POST /api/pdf/from-url
+Content-Type: application/json
+
+{
+  "requestedKey": "spa-page",
+  "url": "https://example.com/dashboard",
+  "options": {
+    "browser": {
+      "timeout": 60000,
+      "waitForSelector": "#chart-container",
+      "waitAfter": 2000
+    },
+    "pdf": {
+      "format": "A4",
+      "printBackground": true
+    }
+  }
+}
+```
+
+> This waits for the `#chart-container` element to appear, then waits an additional 2 seconds before generating the PDF.
+
 #### Generate PDF from File
 
 ```bash
@@ -248,10 +273,12 @@ GET /health/live  # Liveness probe with queue stats
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `timeout` | number | Navigation timeout in ms |
+| `timeout` | number | Navigation timeout in ms (max 120000) |
 | `viewport` | object | `{ width, height }` |
 | `userAgent` | string | Custom user agent |
 | `extraHTTPHeaders` | object | Additional HTTP headers |
+| `waitForSelector` | string | CSS selector to wait for before generating PDF |
+| `waitAfter` | number | Additional wait time (ms) after page load or selector appears (max 60000) |
 
 ### PDF Options
 

@@ -195,6 +195,52 @@ describe('PDF Schemas', () => {
       const result = browserOptionsSchema.safeParse({});
       expect(result.success).toBe(true);
     });
+
+    it('should accept waitForSelector option', () => {
+      const options = {
+        waitForSelector: '#content-loaded',
+      };
+
+      const result = browserOptionsSchema.safeParse(options);
+      expect(result.success).toBe(true);
+    });
+
+    it('should accept waitAfter option', () => {
+      const options = {
+        waitAfter: 2000,
+      };
+
+      const result = browserOptionsSchema.safeParse(options);
+      expect(result.success).toBe(true);
+    });
+
+    it('should accept both waitForSelector and waitAfter', () => {
+      const options = {
+        waitForSelector: '.chart-container',
+        waitAfter: 3000,
+      };
+
+      const result = browserOptionsSchema.safeParse(options);
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject waitAfter exceeding max (60000)', () => {
+      const options = {
+        waitAfter: 70000,
+      };
+
+      const result = browserOptionsSchema.safeParse(options);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject empty waitForSelector', () => {
+      const options = {
+        waitForSelector: '',
+      };
+
+      const result = browserOptionsSchema.safeParse(options);
+      expect(result.success).toBe(false);
+    });
   });
 
   describe('pdfOptionsSchema', () => {

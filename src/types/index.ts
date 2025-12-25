@@ -15,6 +15,8 @@ export interface BrowserOptions {
   };
   userAgent?: string;
   extraHTTPHeaders?: Record<string, string>;
+  waitForSelector?: string; // CSS selector to wait for before generating PDF
+  waitAfter?: number; // Additional wait time (ms) after page load or selector appears
 }
 
 // PDF Options

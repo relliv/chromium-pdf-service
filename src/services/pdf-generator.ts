@@ -140,6 +140,8 @@ class PdfGenerator {
       },
       userAgent: job.options.browser.userAgent,
       extraHTTPHeaders: job.options.browser.extraHTTPHeaders,
+      waitForSelector: job.options.browser.waitForSelector,
+      waitAfter: job.options.browser.waitAfter,
     };
 
     // If width/height are provided, don't use format (custom dimensions take precedence)
@@ -187,7 +189,32 @@ class PdfGenerator {
         await page.setContent(job.source, { waitUntil: 'networkidle' });
       }
 
+      queueManager.updateJobProgress(job.requestedKey, 40);
+
+      // Wait for selector if provided
+      if (browserOptions.waitForSelector) {
+        logger.info(
+          { requestedKey: job.requestedKey, selector: browserOptions.waitForSelector },
+          'Waiting for selector'
+        );
+        await page.waitForSelector(browserOptions.waitForSelector, {
+          state: 'visible',
+          timeout: browserOptions.timeout ?? 30000,
+        });
+      }
+
       queueManager.updateJobProgress(job.requestedKey, 50);
+
+      // Wait additional time after page load or selector appears
+      if (browserOptions.waitAfter && browserOptions.waitAfter > 0) {
+        logger.info(
+          { requestedKey: job.requestedKey, waitAfter: browserOptions.waitAfter },
+          'Waiting additional time'
+        );
+        await this.delay(browserOptions.waitAfter);
+      }
+
+      queueManager.updateJobProgress(job.requestedKey, 60);
 
       // Check if cancelled mid-process
       const currentJob = queueManager.getJob(job.requestedKey);
