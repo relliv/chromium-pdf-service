@@ -13,11 +13,14 @@ services:
       - LOG_LEVEL=info
       - SETTINGS_PATH=/app/data/settings.json
       - OUTPUT_DIR=/app/pdf-files
+      - LOGS_DIR=/app/logs
     volumes:
       # Persist settings (bind mount to local directory)
       - ./data:/app/data
       # Persist generated PDFs (bind mount to local directory)
       - ./pdf-files:/app/pdf-files
+      # Persist logs (bind mount to local directory)
+      - ./logs:/app/logs
     restart: unless-stopped
     healthcheck:
       test:

@@ -209,6 +209,7 @@ GET /health/live  # Liveness probe with queue stats
 | `LOG_LEVEL` | `info` | Logging level |
 | `SETTINGS_PATH` | `data/settings.json` | Settings file path |
 | `OUTPUT_DIR` | `pdf-files` | PDF output directory |
+| `LOGS_DIR` | `logs` | Process logs directory |
 
 ### Settings Schema
 
@@ -274,6 +275,21 @@ GET /health/live  # Liveness probe with queue stats
 | Option | Type | Description |
 |--------|------|-------------|
 | `priority` | number | Priority level 1-10 (higher = processed first) |
+
+## 📝 Logging
+
+Logs are written to both stdout and daily JSON log files in the `logs` directory.
+
+**Log file format:** `dd-mm-yyyy.json`
+
+Example: `25-12-2025.json`
+
+Each line in the log file is a JSON object containing:
+- `level`: Log level (info, warn, error)
+- `time`: Unix timestamp
+- `service`: Service name
+- `msg`: Log message
+- Additional context fields
 
 ## 📁 File Naming
 

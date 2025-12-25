@@ -5,6 +5,7 @@ export const env = {
   logLevel: process.env.LOG_LEVEL ?? 'info',
   settingsPath: process.env.SETTINGS_PATH ?? 'data/settings.json',
   outputDir: process.env.OUTPUT_DIR ?? 'pdf-files',
+  logsDir: process.env.LOGS_DIR ?? 'logs',
 } as const;
 
 export const isDevelopment = env.nodeEnv === 'development';
