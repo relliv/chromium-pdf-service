@@ -105,6 +105,7 @@ GET /api/pdf/status/:requestedKey
 ```
 
 Response:
+
 ```json
 {
   "requestedKey": "invoice-12345",
@@ -249,7 +250,8 @@ GET /health/live  # Liveness probe with queue stats
 ## File Naming
 
 Generated PDFs are stored with the format:
-```
+
+```txt
 {requestedKey}__{year}-{month}-{day}-{hour}-{minute}-{second}.pdf
 ```
 
