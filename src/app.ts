@@ -1,10 +1,21 @@
 import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
-import { logger } from './utils/logger.js';
+import { isDevelopment } from './config/env.js';
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
-    logger: logger,
+    logger: isDevelopment
+      ? {
+          transport: {
+            target: 'pino-pretty',
+            options: {
+              colorize: true,
+              translateTime: 'SYS:standard',
+              ignore: 'pid,hostname',
+            },
+          },
+        }
+      : true,
   });
 
   // Register CORS
