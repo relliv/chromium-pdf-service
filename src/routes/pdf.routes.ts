@@ -4,6 +4,7 @@ import { pdfGenerator } from '../services/pdf-generator.js';
 import { queueManager } from '../services/queue-manager.js';
 import { htmlPdfRequestSchema, urlPdfRequestSchema } from '../schemas/pdf.schema.js';
 import { ZodError } from 'zod';
+import { logger } from '../utils/logger.js';
 
 /**
  * Check if a completed PDF already exists for the given requestedKey.
@@ -38,9 +39,12 @@ export async function pdfRoutes(app: FastifyInstance): Promise<void> {
     try {
       const body = htmlPdfRequestSchema.parse(request.body);
 
-      // If reCreate is requested, remove existing job first
+      logger.info({ requestedKey: body.requestedKey, reCreate: body.reCreate }, 'PDF from HTML request');
+
+      // If reCreate is requested, remove existing job and PDF file first
       if (body.reCreate) {
-        queueManager.removeJob(body.requestedKey);
+        logger.info({ requestedKey: body.requestedKey }, 'Removing existing job for reCreate');
+        await queueManager.removeJob(body.requestedKey);
       } else {
         // Check if a completed PDF already exists for this requestedKey
         const existingPdf = getExistingCompletedPdf(body.requestedKey);
@@ -85,11 +89,17 @@ export async function pdfRoutes(app: FastifyInstance): Promise<void> {
   // POST /api/pdf/from-url - Generate PDF from URL
   app.post('/api/pdf/from-url', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
+      // Log raw request body for debugging
+      logger.info({ rawBody: request.body }, 'Raw request body received');
+
       const body = urlPdfRequestSchema.parse(request.body);
 
-      // If reCreate is requested, remove existing job first
+      logger.info({ requestedKey: body.requestedKey, reCreate: body.reCreate }, 'PDF from URL request');
+
+      // If reCreate is requested, remove existing job and PDF file first
       if (body.reCreate) {
-        queueManager.removeJob(body.requestedKey);
+        logger.info({ requestedKey: body.requestedKey }, 'Removing existing job for reCreate');
+        await queueManager.removeJob(body.requestedKey);
       } else {
         // Check if a completed PDF already exists for this requestedKey
         const existingPdf = getExistingCompletedPdf(body.requestedKey);
@@ -187,9 +197,9 @@ export async function pdfRoutes(app: FastifyInstance): Promise<void> {
         'value' in reCreateField &&
         String(reCreateField.value) === 'true';
 
-      // If reCreate is requested, remove existing job first
+      // If reCreate is requested, remove existing job and PDF file first
       if (reCreate) {
-        queueManager.removeJob(requestedKey);
+        await queueManager.removeJob(requestedKey);
       } else {
         // Check if a completed PDF already exists for this requestedKey
         const existingPdf = getExistingCompletedPdf(requestedKey);

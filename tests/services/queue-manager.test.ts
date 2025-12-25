@@ -195,7 +195,7 @@ describe('QueueManager', () => {
       queueManager.markAsProcessing('remove-test');
       queueManager.updateJobStatus('remove-test', 'completed', { filePath: '/test/path.pdf' });
 
-      const removed = queueManager.removeJob('remove-test');
+      const removed = await queueManager.removeJob('remove-test');
 
       expect(removed).toBe(true);
       expect(queueManager.getJobStatus('remove-test')).toBeUndefined();
@@ -210,14 +210,14 @@ describe('QueueManager', () => {
         options: { browser: {}, pdf: {} },
       });
 
-      const removed = queueManager.removeJob('remove-queued');
+      const removed = await queueManager.removeJob('remove-queued');
 
       expect(removed).toBe(true);
       expect(queueManager.getJobStatus('remove-queued')).toBeUndefined();
     });
 
-    it('should return false for non-existent job', () => {
-      const removed = queueManager.removeJob('non-existent');
+    it('should return false for non-existent job', async () => {
+      const removed = await queueManager.removeJob('non-existent');
 
       expect(removed).toBe(false);
     });
@@ -233,7 +233,7 @@ describe('QueueManager', () => {
 
       queueManager.markAsProcessing('remove-processing');
 
-      const removed = queueManager.removeJob('remove-processing');
+      const removed = await queueManager.removeJob('remove-processing');
 
       expect(removed).toBe(false);
       expect(queueManager.getJobStatus('remove-processing')).toBeDefined();
