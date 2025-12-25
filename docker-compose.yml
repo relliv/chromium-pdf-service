@@ -14,10 +14,10 @@ services:
       - SETTINGS_PATH=/app/data/settings.json
       - OUTPUT_DIR=/app/pdf-files
     volumes:
-      # Persist settings
-      - pdf-settings:/app/data
-      # Persist generated PDFs
-      - pdf-files:/app/pdf-files
+      # Persist settings (bind mount to local directory)
+      - ./data:/app/data
+      # Persist generated PDFs (bind mount to local directory)
+      - ./pdf-files:/app/pdf-files
     restart: unless-stopped
     healthcheck:
       test:
@@ -41,8 +41,3 @@ services:
           cpus: "0.5"
           memory: 512M
 
-volumes:
-  pdf-settings:
-    driver: local
-  pdf-files:
-    driver: local

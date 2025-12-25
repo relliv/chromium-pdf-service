@@ -24,17 +24,13 @@ WORKDIR /app
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 RUN npx playwright install chromium
 
-# Create non-root user
-RUN groupadd -r pdfservice && useradd -r -g pdfservice pdfservice
-
 # Copy built files from builder stage
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 
-# Create directories for data and PDFs
-RUN mkdir -p /app/data /app/pdf-files && \
-    chown -R pdfservice:pdfservice /app
+# Create directories for data and PDFs (will be overwritten by bind mounts)
+RUN mkdir -p /app/data /app/pdf-files
 
 # Set environment variables
 ENV NODE_ENV=production
@@ -42,9 +38,6 @@ ENV HOST=0.0.0.0
 ENV PORT=3000
 ENV SETTINGS_PATH=/app/data/settings.json
 ENV OUTPUT_DIR=/app/pdf-files
-
-# Switch to non-root user
-USER pdfservice
 
 # Expose port
 EXPOSE 3000
