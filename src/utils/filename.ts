@@ -1,8 +1,8 @@
 /**
- * Generate a filename for the PDF file
- * Format: {requestedKey}__{year}-{month}-{day}-{hour}-{minute}-{second}.pdf
+ * Generate a timestamp string for filenames
+ * Format: {year}-{month}-{day}-{hour}-{minute}-{second}
  */
-export function generatePdfFilename(requestedKey: string, date: Date = new Date()): string {
+function generateTimestamp(date: Date = new Date()): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
@@ -10,7 +10,23 @@ export function generatePdfFilename(requestedKey: string, date: Date = new Date(
   const minute = String(date.getMinutes()).padStart(2, '0');
   const second = String(date.getSeconds()).padStart(2, '0');
 
-  return `${requestedKey}__${year}-${month}-${day}-${hour}-${minute}-${second}.pdf`;
+  return `${year}-${month}-${day}-${hour}-${minute}-${second}`;
+}
+
+/**
+ * Generate a filename for the PDF file
+ * Format: {requestedKey}__{year}-{month}-{day}-{hour}-{minute}-{second}.pdf
+ */
+export function generatePdfFilename(requestedKey: string, date: Date = new Date()): string {
+  return `${requestedKey}__${generateTimestamp(date)}.pdf`;
+}
+
+/**
+ * Generate a filename for error screenshots
+ * Format: {requestedKey}__error__{year}-{month}-{day}-{hour}-{minute}-{second}.png
+ */
+export function generateErrorScreenshotFilename(requestedKey: string, date: Date = new Date()): string {
+  return `${requestedKey}__error__${generateTimestamp(date)}.png`;
 }
 
 /**

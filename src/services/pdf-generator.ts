@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import type { PdfJob, BrowserOptions, PdfOptions } from '../types/index.js';
 import { settingsManager } from './settings-manager.js';
 import { queueManager, QueuedJob } from './queue-manager.js';
-import { generatePdfFilename } from '../utils/filename.js';
+import { generatePdfFilename, generateErrorScreenshotFilename } from '../utils/filename.js';
 import { logger } from '../utils/logger.js';
 
 class PdfGenerator {
@@ -254,6 +254,30 @@ class PdfGenerator {
       logger.info({ requestedKey: job.requestedKey, filePath }, 'PDF generated successfully');
 
       return filePath;
+    } catch (error) {
+      // Take screenshot on error for debugging
+      let screenshotPath: string | undefined;
+      try {
+        const outputDir = settings.storage.outputDir;
+        if (!existsSync(outputDir)) {
+          await mkdir(outputDir, { recursive: true });
+        }
+        const screenshotFilename = generateErrorScreenshotFilename(job.requestedKey);
+        screenshotPath = join(outputDir, screenshotFilename);
+        await page.screenshot({ path: screenshotPath, fullPage: true });
+        logger.info({ requestedKey: job.requestedKey, screenshotPath }, 'Error screenshot captured');
+      } catch (screenshotError) {
+        logger.warn({ requestedKey: job.requestedKey, error: screenshotError }, 'Failed to capture error screenshot');
+      }
+
+      // Re-throw with screenshot info
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const enhancedError = new Error(
+        screenshotPath
+          ? `${errorMessage} (screenshot: ${screenshotPath})`
+          : errorMessage
+      );
+      throw enhancedError;
     } finally {
       await page.close();
       await context.close();
