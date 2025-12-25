@@ -1,22 +1,119 @@
 import { EventEmitter } from 'node:events';
-import { unlink } from 'node:fs/promises';
+import { unlink, writeFile, readFile, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { join, dirname } from 'node:path';
 import type { PdfJob, JobStatus } from '../types/index.js';
 import { settingsManager } from './settings-manager.js';
 import { logger } from '../utils/logger.js';
+
+const QUEUE_FILE_PATH = join(process.cwd(), 'data', 'queue.json');
 
 export interface QueuedJob extends PdfJob {
   resolve?: (value: PdfJob) => void;
   reject?: (error: Error) => void;
 }
 
+interface PersistedJob {
+  requestedKey: string;
+  type: PdfJob['type'];
+  source: string;
+  priority: number;
+  status: JobStatus;
+  progress: number;
+  createdAt: string;
+  updatedAt: string;
+  filePath?: string;
+  error?: string;
+  options: PdfJob['options'];
+}
+
 class QueueManager extends EventEmitter {
   private queue: Map<string, QueuedJob> = new Map();
   private processing: Set<string> = new Set();
   private isProcessing = false;
+  private saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     super();
+    this.loadFromFile();
+  }
+
+  private async loadFromFile(): Promise<void> {
+    try {
+      if (!existsSync(QUEUE_FILE_PATH)) {
+        return;
+      }
+
+      const data = await readFile(QUEUE_FILE_PATH, 'utf-8');
+      const jobs: PersistedJob[] = JSON.parse(data);
+
+      for (const job of jobs) {
+        // Reset processing jobs to queued (they were interrupted)
+        const status = job.status === 'processing' ? 'queued' : job.status;
+
+        const queuedJob: QueuedJob = {
+          requestedKey: job.requestedKey,
+          type: job.type,
+          source: job.source,
+          priority: job.priority,
+          status,
+          progress: status === 'queued' ? 0 : job.progress,
+          createdAt: new Date(job.createdAt),
+          updatedAt: new Date(job.updatedAt),
+          filePath: job.filePath,
+          error: job.error,
+          options: job.options,
+        };
+
+        this.queue.set(job.requestedKey, queuedJob);
+      }
+
+      logger.info({ jobCount: jobs.length }, 'Queue loaded from file');
+
+      // Restart processing for queued jobs
+      this.processQueue();
+    } catch (error) {
+      logger.warn({ error }, 'Failed to load queue from file');
+    }
+  }
+
+  private scheduleSave(): void {
+    // Debounce saves to avoid excessive writes
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+    }
+    this.saveTimeout = setTimeout(() => {
+      this.saveToFile().catch((err) => {
+        logger.warn({ error: err }, 'Failed to save queue to file');
+      });
+    }, 100);
+  }
+
+  private async saveToFile(): Promise<void> {
+    try {
+      const dir = dirname(QUEUE_FILE_PATH);
+      if (!existsSync(dir)) {
+        await mkdir(dir, { recursive: true });
+      }
+
+      const jobs: PersistedJob[] = Array.from(this.queue.values()).map((job) => ({
+        requestedKey: job.requestedKey,
+        type: job.type,
+        source: job.source,
+        priority: job.priority,
+        status: job.status,
+        progress: job.progress,
+        createdAt: job.createdAt.toISOString(),
+        updatedAt: job.updatedAt.toISOString(),
+        filePath: job.filePath,
+        error: job.error,
+        options: job.options,
+      }));
+
+      await writeFile(QUEUE_FILE_PATH, JSON.stringify(jobs, null, 2), 'utf-8');
+    } catch (error) {
+      logger.error({ error }, 'Failed to save queue to file');
+    }
   }
 
   async addJob(
@@ -45,6 +142,9 @@ class QueueManager extends EventEmitter {
 
     this.queue.set(job.requestedKey, queuedJob);
     logger.info({ requestedKey: job.requestedKey, type: job.type }, 'Job added to queue');
+
+    // Persist queue
+    this.scheduleSave();
 
     // Start processing if not already running
     this.processQueue();
@@ -97,6 +197,7 @@ class QueueManager extends EventEmitter {
       job.status = 'cancelled';
       job.updatedAt = new Date();
       logger.info({ requestedKey }, 'Job cancelled during processing');
+      this.scheduleSave();
       return true;
     }
 
@@ -104,6 +205,7 @@ class QueueManager extends EventEmitter {
     job.status = 'cancelled';
     job.updatedAt = new Date();
     logger.info({ requestedKey }, 'Job cancelled while queued');
+    this.scheduleSave();
     return true;
   }
 
@@ -135,6 +237,7 @@ class QueueManager extends EventEmitter {
 
     this.queue.delete(requestedKey);
     logger.info({ requestedKey }, 'Job removed from queue');
+    this.scheduleSave();
     return true;
   }
 
@@ -143,6 +246,7 @@ class QueueManager extends EventEmitter {
     if (job && job.status === 'processing') {
       job.progress = Math.min(100, Math.max(0, progress));
       job.updatedAt = new Date();
+      this.scheduleSave();
     }
   }
 
@@ -166,6 +270,8 @@ class QueueManager extends EventEmitter {
         this.processing.delete(requestedKey);
         logger.error({ requestedKey, error: job.error }, 'Job failed');
       }
+
+      this.scheduleSave();
     }
   }
 
@@ -197,6 +303,7 @@ class QueueManager extends EventEmitter {
       job.updatedAt = new Date();
       this.processing.add(requestedKey);
       logger.info({ requestedKey }, 'Job processing started');
+      this.scheduleSave();
     }
   }
 
@@ -235,6 +342,7 @@ class QueueManager extends EventEmitter {
 
     if (cleaned > 0) {
       logger.info({ cleaned }, 'Cleaned up old jobs');
+      this.scheduleSave();
     }
 
     return cleaned;

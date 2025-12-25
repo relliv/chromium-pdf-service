@@ -28,6 +28,11 @@ pdf-files/*.pdf
 # Settings (keep example, ignore actual)
 data/settings.json
 
+pdf-files/
+
+# Queue persistence
+data/queue.json
+
 # Playwright
 /test-results/
 /playwright-report/
