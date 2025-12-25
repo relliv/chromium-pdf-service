@@ -142,8 +142,15 @@ class PdfGenerator {
       extraHTTPHeaders: job.options.browser.extraHTTPHeaders,
     };
 
+    // If width/height are provided, don't use format (custom dimensions take precedence)
+    const hasCustomDimensions = job.options.pdf.width || job.options.pdf.height;
+
     const pdfOptions: PdfOptions = {
-      format: job.options.pdf.format ?? (settings.pdf.defaultFormat as PdfOptions['format']),
+      format: hasCustomDimensions
+        ? undefined
+        : (job.options.pdf.format ?? (settings.pdf.defaultFormat as PdfOptions['format'])),
+      width: job.options.pdf.width,
+      height: job.options.pdf.height,
       landscape: job.options.pdf.landscape,
       margin: {
         top: job.options.pdf.margin?.top ?? settings.pdf.defaultMargin.top,
@@ -204,6 +211,8 @@ class PdfGenerator {
       await page.pdf({
         path: filePath,
         format: pdfOptions.format,
+        width: pdfOptions.width,
+        height: pdfOptions.height,
         landscape: pdfOptions.landscape,
         margin: pdfOptions.margin,
         printBackground: pdfOptions.printBackground,

@@ -13,24 +13,43 @@ export const browserOptionsSchema = z.object({
   extraHTTPHeaders: z.record(z.string()).optional(),
 });
 
+// PDF dimension value (can be number in pixels or string with unit)
+const pdfDimensionSchema = z.union([
+  z.number().int().positive().max(10000),
+  z.string().max(20).regex(/^\d+(\.\d+)?(px|in|cm|mm)?$/, 'Invalid dimension format'),
+]);
+
 // PDF options schema
-export const pdfOptionsSchema = z.object({
-  format: z.enum(['A4', 'Letter', 'Legal', 'A3', 'A5']).optional(),
-  landscape: z.boolean().optional(),
-  margin: z
-    .object({
-      top: z.string().max(20).optional(),
-      right: z.string().max(20).optional(),
-      bottom: z.string().max(20).optional(),
-      left: z.string().max(20).optional(),
-    })
-    .optional(),
-  printBackground: z.boolean().optional(),
-  scale: z.number().positive().max(2).optional(),
-  headerTemplate: z.string().max(10000).optional(),
-  footerTemplate: z.string().max(10000).optional(),
-  displayHeaderFooter: z.boolean().optional(),
-});
+export const pdfOptionsSchema = z
+  .object({
+    format: z.enum(['A4', 'Letter', 'Legal', 'A3', 'A5']).optional(),
+    width: pdfDimensionSchema.optional(),
+    height: pdfDimensionSchema.optional(),
+    landscape: z.boolean().optional(),
+    margin: z
+      .object({
+        top: z.string().max(20).optional(),
+        right: z.string().max(20).optional(),
+        bottom: z.string().max(20).optional(),
+        left: z.string().max(20).optional(),
+      })
+      .optional(),
+    printBackground: z.boolean().optional(),
+    scale: z.number().positive().max(2).optional(),
+    headerTemplate: z.string().max(10000).optional(),
+    footerTemplate: z.string().max(10000).optional(),
+    displayHeaderFooter: z.boolean().optional(),
+  })
+  .refine(
+    (data) => {
+      // If width or height is provided, format should not be used
+      if ((data.width || data.height) && data.format) {
+        return false;
+      }
+      return true;
+    },
+    { message: 'Cannot use both format and width/height. Use either format OR width/height.' }
+  );
 
 // Queue options schema
 export const queueOptionsSchema = z.object({

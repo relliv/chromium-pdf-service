@@ -20,6 +20,8 @@ export interface BrowserOptions {
 // PDF Options
 export interface PdfOptions {
   format?: 'A4' | 'Letter' | 'Legal' | 'A3' | 'A5';
+  width?: string | number; // e.g., '400px', 400, '10cm'
+  height?: string | number; // e.g., '1000px', 1000, '20cm'
   landscape?: boolean;
   margin?: {
     top?: string;

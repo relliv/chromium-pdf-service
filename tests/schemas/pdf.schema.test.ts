@@ -245,5 +245,69 @@ describe('PDF Schemas', () => {
       const result = pdfOptionsSchema.safeParse(options);
       expect(result.success).toBe(true);
     });
+
+    it('should accept width and height as numbers', () => {
+      const options = {
+        width: 400,
+        height: 1000,
+      };
+
+      const result = pdfOptionsSchema.safeParse(options);
+      expect(result.success).toBe(true);
+    });
+
+    it('should accept width and height as strings with units', () => {
+      const options = {
+        width: '400px',
+        height: '25cm',
+      };
+
+      const result = pdfOptionsSchema.safeParse(options);
+      expect(result.success).toBe(true);
+    });
+
+    it('should accept various dimension formats', () => {
+      const validDimensions = ['100', '100px', '10in', '25.4cm', '254mm'];
+
+      for (const dim of validDimensions) {
+        const result = pdfOptionsSchema.safeParse({ width: dim });
+        expect(result.success).toBe(true);
+      }
+    });
+
+    it('should reject invalid dimension formats', () => {
+      const invalidDimensions = ['abc', '100em', '100%', 'px100'];
+
+      for (const dim of invalidDimensions) {
+        const result = pdfOptionsSchema.safeParse({ width: dim });
+        expect(result.success).toBe(false);
+      }
+    });
+
+    it('should reject using both format and width/height', () => {
+      const options = {
+        format: 'A4',
+        width: 400,
+        height: 1000,
+      };
+
+      const result = pdfOptionsSchema.safeParse(options);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toContain('Cannot use both format and width/height');
+      }
+    });
+
+    it('should allow width/height without format', () => {
+      const options = {
+        width: 400,
+        height: 1000,
+        printBackground: true,
+        margin: { top: '10mm' },
+      };
+
+      const result = pdfOptionsSchema.safeParse(options);
+      expect(result.success).toBe(true);
+    });
   });
 });
