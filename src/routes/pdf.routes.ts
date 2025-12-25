@@ -1,8 +1,28 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import multipart from '@fastify/multipart';
 import { pdfGenerator } from '../services/pdf-generator.js';
+import { queueManager } from '../services/queue-manager.js';
 import { htmlPdfRequestSchema, urlPdfRequestSchema } from '../schemas/pdf.schema.js';
 import { ZodError } from 'zod';
+
+/**
+ * Check if a completed PDF already exists for the given requestedKey.
+ * If it exists, returns the response object; otherwise returns null.
+ */
+function getExistingCompletedPdf(requestedKey: string) {
+  const existingJob = queueManager.getJobStatus(requestedKey);
+  if (existingJob && existingJob.status === 'completed' && existingJob.filePath) {
+    return {
+      message: 'PDF already exists',
+      requestedKey: existingJob.requestedKey,
+      status: existingJob.status,
+      filePath: existingJob.filePath,
+      createdAt: existingJob.createdAt,
+      updatedAt: existingJob.updatedAt,
+    };
+  }
+  return null;
+}
 
 export async function pdfRoutes(app: FastifyInstance): Promise<void> {
   // Register multipart for file uploads
@@ -17,6 +37,12 @@ export async function pdfRoutes(app: FastifyInstance): Promise<void> {
   app.post('/api/pdf/from-html', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = htmlPdfRequestSchema.parse(request.body);
+
+      // Check if a completed PDF already exists for this requestedKey
+      const existingPdf = getExistingCompletedPdf(body.requestedKey);
+      if (existingPdf) {
+        return reply.status(200).send(existingPdf);
+      }
 
       const job = await pdfGenerator.generateFromHtml(body.requestedKey, body.html, {
         browser: body.options?.browser,
@@ -55,6 +81,12 @@ export async function pdfRoutes(app: FastifyInstance): Promise<void> {
   app.post('/api/pdf/from-url', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = urlPdfRequestSchema.parse(request.body);
+
+      // Check if a completed PDF already exists for this requestedKey
+      const existingPdf = getExistingCompletedPdf(body.requestedKey);
+      if (existingPdf) {
+        return reply.status(200).send(existingPdf);
+      }
 
       const job = await pdfGenerator.generateFromUrl(body.requestedKey, body.url, {
         browser: body.options?.browser,
@@ -135,6 +167,12 @@ export async function pdfRoutes(app: FastifyInstance): Promise<void> {
         return reply.status(400).send({
           error: 'requestedKey must be alphanumeric with dashes and underscores',
         });
+      }
+
+      // Check if a completed PDF already exists for this requestedKey
+      const existingPdf = getExistingCompletedPdf(requestedKey);
+      if (existingPdf) {
+        return reply.status(200).send(existingPdf);
       }
 
       // Extract options if provided
