@@ -181,6 +181,65 @@ describe('QueueManager', () => {
     });
   });
 
+  describe('removeJob', () => {
+    it('should remove a completed job from queue', async () => {
+      await queueManager.addJob({
+        requestedKey: 'remove-test',
+        type: 'html',
+        source: '<html></html>',
+        priority: 5,
+        options: { browser: {}, pdf: {} },
+      });
+
+      // Mark as completed
+      queueManager.markAsProcessing('remove-test');
+      queueManager.updateJobStatus('remove-test', 'completed', { filePath: '/test/path.pdf' });
+
+      const removed = queueManager.removeJob('remove-test');
+
+      expect(removed).toBe(true);
+      expect(queueManager.getJobStatus('remove-test')).toBeUndefined();
+    });
+
+    it('should remove a queued job', async () => {
+      await queueManager.addJob({
+        requestedKey: 'remove-queued',
+        type: 'html',
+        source: '<html></html>',
+        priority: 5,
+        options: { browser: {}, pdf: {} },
+      });
+
+      const removed = queueManager.removeJob('remove-queued');
+
+      expect(removed).toBe(true);
+      expect(queueManager.getJobStatus('remove-queued')).toBeUndefined();
+    });
+
+    it('should return false for non-existent job', () => {
+      const removed = queueManager.removeJob('non-existent');
+
+      expect(removed).toBe(false);
+    });
+
+    it('should return false for processing job', async () => {
+      await queueManager.addJob({
+        requestedKey: 'remove-processing',
+        type: 'html',
+        source: '<html></html>',
+        priority: 5,
+        options: { browser: {}, pdf: {} },
+      });
+
+      queueManager.markAsProcessing('remove-processing');
+
+      const removed = queueManager.removeJob('remove-processing');
+
+      expect(removed).toBe(false);
+      expect(queueManager.getJobStatus('remove-processing')).toBeDefined();
+    });
+  });
+
   describe('updateJobProgress', () => {
     it('should update progress for processing job', async () => {
       await queueManager.addJob({

@@ -73,6 +73,7 @@ const basePdfRequestSchema = z.object({
     .max(255)
     .regex(/^[a-zA-Z0-9_-]+$/, 'requestedKey must be alphanumeric with dashes and underscores'),
   options: requestOptionsSchema.optional(),
+  reCreate: z.boolean().optional(), // Force recreate PDF even if one already exists
 });
 
 // HTML PDF request schema

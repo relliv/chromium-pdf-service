@@ -6,7 +6,7 @@ A simple PDF generation service built with Fastify, TypeScript, Playwright, and 
 
 - **Multiple Input Sources**: Generate PDFs from HTML content, URLs, or uploaded HTML files
 - **Queue System**: Built-in job queue with priority support, status tracking, and cancellation
-- **Idempotent Requests**: Same `requestedKey` returns existing PDF if already completed
+- **Idempotent Requests**: Same `requestedKey` returns existing PDF if already completed (use `reCreate: true` to force regeneration)
 - **Custom Dimensions**: Use predefined formats (A4, Letter) or custom width/height
 - **Configurable**: Customizable browser options, PDF settings, and queue limits
 - **Docker Ready**: Production-ready Docker configuration with Chromium
@@ -279,6 +279,12 @@ GET /health/live  # Liveness probe with queue stats
 | `extraHTTPHeaders` | object | Additional HTTP headers |
 | `waitForSelector` | string | CSS selector to wait for before generating PDF |
 | `waitAfter` | number | Additional wait time (ms) after page load or selector appears (max 60000) |
+
+### Request Options
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `reCreate` | boolean | Force recreate PDF even if one already exists for this requestedKey |
 
 ### PDF Options
 

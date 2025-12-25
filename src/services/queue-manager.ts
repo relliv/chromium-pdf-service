@@ -105,6 +105,27 @@ class QueueManager extends EventEmitter {
     return true;
   }
 
+  /**
+   * Remove a job from the queue entirely (for reCreate functionality)
+   * Returns true if job was removed, false if job doesn't exist or is processing
+   */
+  removeJob(requestedKey: string): boolean {
+    const job = this.queue.get(requestedKey);
+
+    if (!job) {
+      return false;
+    }
+
+    // Don't remove if currently processing
+    if (job.status === 'processing') {
+      return false;
+    }
+
+    this.queue.delete(requestedKey);
+    logger.info({ requestedKey }, 'Job removed from queue');
+    return true;
+  }
+
   updateJobProgress(requestedKey: string, progress: number): void {
     const job = this.queue.get(requestedKey);
     if (job && job.status === 'processing') {

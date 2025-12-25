@@ -73,6 +73,28 @@ describe('PDF Schemas', () => {
       expect(result.success).toBe(true);
     });
 
+    it('should accept reCreate option', () => {
+      const validRequest = {
+        requestedKey: 'test-key',
+        html: '<html></html>',
+        reCreate: true,
+      };
+
+      const result = htmlPdfRequestSchema.safeParse(validRequest);
+      expect(result.success).toBe(true);
+    });
+
+    it('should accept reCreate as false', () => {
+      const validRequest = {
+        requestedKey: 'test-key',
+        html: '<html></html>',
+        reCreate: false,
+      };
+
+      const result = htmlPdfRequestSchema.safeParse(validRequest);
+      expect(result.success).toBe(true);
+    });
+
     it('should reject empty html', () => {
       const invalidRequest = {
         requestedKey: 'test-key',

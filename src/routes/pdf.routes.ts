@@ -38,10 +38,15 @@ export async function pdfRoutes(app: FastifyInstance): Promise<void> {
     try {
       const body = htmlPdfRequestSchema.parse(request.body);
 
-      // Check if a completed PDF already exists for this requestedKey
-      const existingPdf = getExistingCompletedPdf(body.requestedKey);
-      if (existingPdf) {
-        return reply.status(200).send(existingPdf);
+      // If reCreate is requested, remove existing job first
+      if (body.reCreate) {
+        queueManager.removeJob(body.requestedKey);
+      } else {
+        // Check if a completed PDF already exists for this requestedKey
+        const existingPdf = getExistingCompletedPdf(body.requestedKey);
+        if (existingPdf) {
+          return reply.status(200).send(existingPdf);
+        }
       }
 
       const job = await pdfGenerator.generateFromHtml(body.requestedKey, body.html, {
@@ -82,10 +87,15 @@ export async function pdfRoutes(app: FastifyInstance): Promise<void> {
     try {
       const body = urlPdfRequestSchema.parse(request.body);
 
-      // Check if a completed PDF already exists for this requestedKey
-      const existingPdf = getExistingCompletedPdf(body.requestedKey);
-      if (existingPdf) {
-        return reply.status(200).send(existingPdf);
+      // If reCreate is requested, remove existing job first
+      if (body.reCreate) {
+        queueManager.removeJob(body.requestedKey);
+      } else {
+        // Check if a completed PDF already exists for this requestedKey
+        const existingPdf = getExistingCompletedPdf(body.requestedKey);
+        if (existingPdf) {
+          return reply.status(200).send(existingPdf);
+        }
       }
 
       const job = await pdfGenerator.generateFromUrl(body.requestedKey, body.url, {
@@ -169,10 +179,23 @@ export async function pdfRoutes(app: FastifyInstance): Promise<void> {
         });
       }
 
-      // Check if a completed PDF already exists for this requestedKey
-      const existingPdf = getExistingCompletedPdf(requestedKey);
-      if (existingPdf) {
-        return reply.status(200).send(existingPdf);
+      // Extract reCreate flag
+      const reCreateField = fields['reCreate'];
+      const reCreate =
+        reCreateField &&
+        typeof reCreateField === 'object' &&
+        'value' in reCreateField &&
+        String(reCreateField.value) === 'true';
+
+      // If reCreate is requested, remove existing job first
+      if (reCreate) {
+        queueManager.removeJob(requestedKey);
+      } else {
+        // Check if a completed PDF already exists for this requestedKey
+        const existingPdf = getExistingCompletedPdf(requestedKey);
+        if (existingPdf) {
+          return reply.status(200).send(existingPdf);
+        }
       }
 
       // Extract options if provided
