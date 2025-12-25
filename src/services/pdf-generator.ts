@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import type { PdfJob, BrowserOptions, PdfOptions } from '../types/index.js';
 import { settingsManager } from './settings-manager.js';
 import { queueManager, QueuedJob } from './queue-manager.js';
-import { generatePdfFilename, generateErrorScreenshotFilename } from '../utils/filename.js';
+import { generatePdfFilename, generateErrorScreenshotFilename, generateDateFolder } from '../utils/filename.js';
 import { logger } from '../utils/logger.js';
 
 class PdfGenerator {
@@ -222,14 +222,16 @@ class PdfGenerator {
         throw new Error('Job was cancelled');
       }
 
-      // Ensure output directory exists
-      const outputDir = settings.storage.outputDir;
+      // Ensure output directory with date folder exists
+      const now = new Date();
+      const dateFolder = generateDateFolder(now);
+      const outputDir = join(settings.storage.outputDir, dateFolder);
       if (!existsSync(outputDir)) {
         await mkdir(outputDir, { recursive: true });
       }
 
       // Generate filename and path
-      const filename = generatePdfFilename(job.requestedKey);
+      const filename = generatePdfFilename(job.requestedKey, now);
       const filePath = join(outputDir, filename);
 
       queueManager.updateJobProgress(job.requestedKey, 70);
@@ -258,12 +260,14 @@ class PdfGenerator {
       // Take screenshot on error for debugging
       let screenshotPath: string | undefined;
       try {
-        const outputDir = settings.storage.outputDir;
-        if (!existsSync(outputDir)) {
-          await mkdir(outputDir, { recursive: true });
+        const errorNow = new Date();
+        const errorDateFolder = generateDateFolder(errorNow);
+        const errorOutputDir = join(settings.storage.outputDir, errorDateFolder);
+        if (!existsSync(errorOutputDir)) {
+          await mkdir(errorOutputDir, { recursive: true });
         }
-        const screenshotFilename = generateErrorScreenshotFilename(job.requestedKey);
-        screenshotPath = join(outputDir, screenshotFilename);
+        const screenshotFilename = generateErrorScreenshotFilename(job.requestedKey, errorNow);
+        screenshotPath = join(errorOutputDir, screenshotFilename);
         await page.screenshot({ path: screenshotPath, fullPage: true });
         logger.info({ requestedKey: job.requestedKey, screenshotPath }, 'Error screenshot captured');
       } catch (screenshotError) {
