@@ -22,6 +22,47 @@ curl -X POST http://localhost:3000/api/pdf/from-html \
   }'
 ```
 
+## 1.1 Simple Invoice PDF with custom dimensions
+
+Generate a basic invoice from URL and custom dimensions.
+
+```bash
+curl -X POST http://localhost:3000/api/pdf/from-url \
+  -H "Content-Type: application/json" \
+  -d '{
+      "requestedKey": "e818261b-ddf0-44b6-ac98-39becdac8fe2",
+      "url": "https://example.com/payment/summary?transactionKey=e818261b-ddf0-44b6-ac98-39becdac8fe2&pdfView=true",
+      "reCreate": true,
+      "options": {
+          "pdf": {
+              "printBackground": true,
+              "landscape": false,
+              "width": 800,
+              "height": 1300,
+              "margin": {
+                  "top": "0mm",
+                  "right": "0mm",
+                  "bottom": "0mm",
+                  "left": "0mm"
+              }
+          },
+          "browser": {
+              "timeout": 20000,
+              "disableAnimations": true,
+              "viewport": {
+                  "width": 400,
+                  "height": 1000
+              },
+              "waitForSelector": "#order-number",
+              "waitAfter": 3000
+          },
+          "queue": {
+              "priority": 10
+          }
+      }
+  }'
+```
+
 ## 2. Website Screenshot as PDF
 
 Capture a full webpage and convert it to PDF with custom viewport.
