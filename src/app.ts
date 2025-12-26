@@ -1,5 +1,6 @@
 import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
+import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
@@ -35,6 +36,13 @@ export async function buildApp(): Promise<FastifyInstance> {
     origin: env.allowedOrigins.length > 0 ? env.allowedOrigins : true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: env.allowedOrigins.length > 0,
+  });
+
+  // Register Security Headers
+  await app.register(helmet, {
+    contentSecurityPolicy: false, // Disabled for PDF/HTML content
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
   });
 
   // Register Rate Limiting
