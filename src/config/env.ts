@@ -9,6 +9,8 @@ export const env = {
   // Rate limiting
   rateLimitMax: parseInt(process.env.RATE_LIMIT_MAX ?? '100', 10),
   rateLimitWindow: parseInt(process.env.RATE_LIMIT_WINDOW ?? '60000', 10), // 1 minute
+  // Authentication
+  apiKeys: process.env.API_KEYS ? process.env.API_KEYS.split(',').map((k) => k.trim()) : [],
 } as const;
 
 export const isDevelopment = env.nodeEnv === 'development';

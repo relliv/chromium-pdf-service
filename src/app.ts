@@ -9,6 +9,7 @@ import { statusRoutes } from './routes/status.routes.js';
 import { settingsRoutes } from './routes/settings.routes.js';
 import { healthRoutes } from './routes/health.routes.js';
 import { errorHandler } from './middleware/error-handler.js';
+import { authMiddleware } from './middleware/auth.js';
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -54,6 +55,9 @@ export async function buildApp(): Promise<FastifyInstance> {
       'retry-after': true,
     },
   });
+
+  // Register API Key Authentication
+  app.addHook('onRequest', authMiddleware);
 
   // Register Swagger (development only)
   if (isDevelopment) {
