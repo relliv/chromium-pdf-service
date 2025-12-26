@@ -39,6 +39,10 @@ data/queue.json
 /blob-report/
 /playwright/.cache/
 
+# VitePress
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+
 # Misc
 *.tgz
 .npm
