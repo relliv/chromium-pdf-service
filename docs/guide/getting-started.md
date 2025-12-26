@@ -2,6 +2,10 @@
 
 Chromium PDF Service is a simple PDF generation service built with Fastify, TypeScript, Playwright, and Docker.
 
+::: tip Suitable Use Cases
+This service is designed for internal tools, proof of concepts, development environments, and trusted networks. For public-facing production deployments, additional security hardening (authentication, rate limiting, etc.) is recommended.
+:::
+
 ## Features
 
 - **Multiple Input Sources**: Generate PDFs from HTML content, URLs, or uploaded HTML files
