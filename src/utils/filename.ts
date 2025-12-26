@@ -57,17 +57,19 @@ export function parsePdfFilename(filename: string): {
 
   const [, requestedKey, day, month, year, hour, minute, second] = match;
 
-  if (!requestedKey) return null;
+  if (!requestedKey || !day || !month || !year || !hour || !minute || !second) {
+    return null;
+  }
 
   return {
     requestedKey,
     timestamp: new Date(
-      parseInt(year!, 10),
-      parseInt(month!, 10) - 1,
-      parseInt(day!, 10),
-      parseInt(hour!, 10),
-      parseInt(minute!, 10),
-      parseInt(second!, 10)
+      parseInt(year, 10),
+      parseInt(month, 10) - 1,
+      parseInt(day, 10),
+      parseInt(hour, 10),
+      parseInt(minute, 10),
+      parseInt(second, 10)
     ),
   };
 }
