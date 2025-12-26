@@ -1,6 +1,7 @@
 # Chromium PDF Service
 
 [![Tests](https://github.com/relliv/chromium-pdf-service/actions/workflows/test.yml/badge.svg)](https://github.com/relliv/chromium-pdf-service/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A simple PDF generation service built with Fastify, TypeScript, Playwright, and Docker.
 
