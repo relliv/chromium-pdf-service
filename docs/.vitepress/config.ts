@@ -3,9 +3,10 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'Chromium PDF Service',
   description: 'A PDF generation service built with Fastify, TypeScript, Playwright, and Docker',
-  
+  base: '/chromium-pdf-service/',
+
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/chromium-pdf-service/logo.svg' }],
   ],
 
   themeConfig: {
