@@ -142,6 +142,7 @@ class PdfGenerator {
       extraHTTPHeaders: job.options.browser.extraHTTPHeaders,
       waitForSelector: job.options.browser.waitForSelector,
       waitAfter: job.options.browser.waitAfter,
+      disableAnimations: job.options.browser.disableAnimations,
     };
 
     // If width/height are provided, don't use format (custom dimensions take precedence)
@@ -171,6 +172,7 @@ class PdfGenerator {
       viewport: browserOptions.viewport,
       userAgent: browserOptions.userAgent,
       extraHTTPHeaders: browserOptions.extraHTTPHeaders,
+      reducedMotion: browserOptions.disableAnimations ? 'reduce' : undefined,
     });
 
     const page = await context.newPage();
@@ -187,6 +189,24 @@ class PdfGenerator {
       } else if (job.type === 'file') {
         // For file type, source contains the HTML content read from file
         await page.setContent(job.source, { waitUntil: 'networkidle' });
+      }
+
+      // Disable all CSS animations and transitions if requested
+      if (browserOptions.disableAnimations) {
+        await page.addStyleTag({
+          content: `
+            *, *::before, *::after {
+              animation: none !important;
+              animation-duration: 0s !important;
+              animation-delay: 0s !important;
+              transition: none !important;
+              transition-duration: 0s !important;
+              transition-delay: 0s !important;
+            }
+          `,
+        });
+        // Small delay to ensure styles are applied
+        await this.delay(50);
       }
 
       queueManager.updateJobProgress(job.requestedKey, 40);

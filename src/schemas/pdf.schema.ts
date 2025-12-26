@@ -13,6 +13,7 @@ export const browserOptionsSchema = z.object({
   extraHTTPHeaders: z.record(z.string()).optional(),
   waitForSelector: z.string().min(1).max(500).optional(), // CSS selector to wait for
   waitAfter: z.number().int().min(0).max(60000).optional(), // Wait time in ms (max 60s)
+  disableAnimations: z.boolean().optional(), // Disable all CSS animations and transitions
 });
 
 // PDF dimension value (can be number in pixels or string with unit)

@@ -17,6 +17,7 @@ export interface BrowserOptions {
   extraHTTPHeaders?: Record<string, string>;
   waitForSelector?: string; // CSS selector to wait for before generating PDF
   waitAfter?: number; // Additional wait time (ms) after page load or selector appears
+  disableAnimations?: boolean; // Disable all CSS animations and transitions
 }
 
 // PDF Options
