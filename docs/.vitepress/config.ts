@@ -44,6 +44,7 @@ export default defineConfig({
           text: 'API Reference',
           items: [
             { text: 'Endpoints', link: '/api/endpoints' },
+            { text: 'Examples', link: '/api/examples' },
             { text: 'Browser Options', link: '/api/browser-options' },
             { text: 'PDF Options', link: '/api/pdf-options' },
             { text: 'Queue Options', link: '/api/queue-options' },
