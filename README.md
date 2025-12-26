@@ -5,6 +5,9 @@
 
 A simple PDF generation service built with Fastify, TypeScript, Playwright, and Docker.
 
+> [!WARNING]
+> This project is in alpha stage and is not ready for production use.
+
 📖 **[Documentation](https://relliv.github.io/chromium-pdf-service/)**
 
 ## Features

@@ -103,6 +103,10 @@ This waits for the `#chart-container` element to appear, then waits an additiona
 }
 ```
 
+::: tip Why disable animations?
+CSS animations and transitions can cause elements to be captured mid-animation, resulting in invisible, partially visible, or incorrectly positioned elements in the PDF. This option injects CSS to disable all animations and sets `prefers-reduced-motion: reduce` for reliable rendering.
+:::
+
 ### Generate PDF with Custom Headers
 
 ```json
