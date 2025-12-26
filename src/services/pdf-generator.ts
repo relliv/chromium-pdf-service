@@ -7,6 +7,7 @@ import { settingsManager } from './settings-manager.js';
 import { queueManager, QueuedJob } from './queue-manager.js';
 import { generatePdfFilename, generateErrorScreenshotFilename, generateDateFolder } from '../utils/filename.js';
 import { logger } from '../utils/logger.js';
+import { validateUrl } from '../utils/url-validator.js';
 
 class PdfGenerator {
   private browser: Browser | null = null;
@@ -342,6 +343,12 @@ class PdfGenerator {
       priority?: number;
     }
   ): Promise<PdfJob> {
+    // Validate URL before adding to queue
+    const validation = validateUrl(url);
+    if (!validation.valid) {
+      throw new Error(`URL validation failed: ${validation.error}`);
+    }
+
     return queueManager.addJob({
       requestedKey,
       type: 'url',

@@ -15,6 +15,11 @@ export const env = {
   allowedOrigins: process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
     : [],
+  // URL Security
+  allowedUrlDomains: process.env.ALLOWED_URL_DOMAINS
+    ? process.env.ALLOWED_URL_DOMAINS.split(',').map((d) => d.trim())
+    : [],
+  blockPrivateIps: process.env.BLOCK_PRIVATE_IPS !== 'false',
 } as const;
 
 export const isDevelopment = env.nodeEnv === 'development';
