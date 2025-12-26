@@ -14,6 +14,7 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/getting-started' },
       { text: 'API', link: '/api/endpoints' },
       { text: 'Configuration', link: '/config/settings' },
+      { text: 'Development', link: '/development/' },
       {
         text: 'GitHub',
         link: 'https://github.com/relliv/chromium-pdf-service',
@@ -58,6 +59,15 @@ export default defineConfig({
           items: [
             { text: 'Settings', link: '/config/settings' },
             { text: 'Environment Variables', link: '/config/env-variables' },
+          ],
+        },
+      ],
+      '/development/': [
+        {
+          text: 'Development',
+          items: [
+            { text: 'Getting Started', link: '/development/' },
+            { text: 'Docker Build & Test', link: '/development/docker-build' },
           ],
         },
       ],
