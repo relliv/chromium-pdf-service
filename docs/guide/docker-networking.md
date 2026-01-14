@@ -199,6 +199,85 @@ services:
       - "api.local:host-gateway"
 ```
 
+## Framework Dev Server Configuration
+
+Many frontend frameworks block requests from unknown hosts by default. You need to configure them to allow `host.docker.internal`.
+
+### Angular
+
+Add `host.docker.internal` to `allowedHosts` in `angular.json`:
+
+```json
+{
+  "projects": {
+    "your-app": {
+      "architect": {
+        "serve": {
+          "options": {
+            "allowedHosts": [
+              "localhost",
+              "host.docker.internal"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Or use the CLI flag:
+
+```bash
+ng serve --host 0.0.0.0 --allowed-hosts host.docker.internal
+```
+
+Or allow all hosts (development only):
+
+```bash
+ng serve --host 0.0.0.0 --disable-host-check
+```
+
+### Next.js
+
+In `next.config.js`:
+
+```js
+module.exports = {
+  allowedDevHosts: ['host.docker.internal'],
+}
+```
+
+### Vite (Vue, React, Svelte)
+
+In `vite.config.js`:
+
+```js
+export default {
+  server: {
+    host: '0.0.0.0',
+    allowedHosts: ['host.docker.internal'],
+  },
+}
+```
+
+### Webpack Dev Server
+
+In `webpack.config.js`:
+
+```js
+module.exports = {
+  devServer: {
+    host: '0.0.0.0',
+    allowedHosts: ['host.docker.internal'],
+  },
+}
+```
+
+::: warning Security Note
+Only allow specific hosts in production. Using `--disable-host-check` or allowing all hosts should be limited to local development.
+:::
+
 ## Troubleshooting
 
 ### Container can't resolve hostname
