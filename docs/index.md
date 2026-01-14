@@ -45,3 +45,10 @@ features:
     title: Security Features
     details: Rate limiting, API authentication, CORS, URL validation, and HTML sanitization
 ---
+
+## AI-Friendly Documentation
+
+This documentation is available in LLM-friendly formats:
+
+- [`/llms.txt`](/llms.txt) - Index with links to all documentation sections
+- [`/llms-full.txt`](/llms-full.txt) - Complete documentation in a single file
