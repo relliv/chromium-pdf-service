@@ -19,9 +19,11 @@ dist
 # Git
 .git
 .gitignore
+.github
 
 # Documentation
 *.md
+docs
 
 # Test files
 tests
@@ -30,6 +32,12 @@ tests
 __tests__
 coverage
 vitest.config.ts
+
+# Dev config files (not needed in production image)
+eslint.config.js
+.prettierrc
+.prettierignore
+.editorconfig
 
 # Logs
 logs
