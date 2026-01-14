@@ -33,6 +33,7 @@ pdf-files/
 
 # Queue persistence
 data/queue.json
+data/screenshot-queue.json
 
 # Playwright
 /test-results/
