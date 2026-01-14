@@ -1,8 +1,9 @@
 name: 🐳 Publish Docker Image
 
 on:
-  push:
-    tags: ["v*"]
+  workflow_run:
+    workflows: ["🧪 Tests"]
+    types: [completed]
   workflow_dispatch:
     inputs:
       tag:
@@ -15,39 +16,13 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  test:
-    name: 🧪 Run Tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24.x
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run linter
-        run: npm run lint
-
-      - name: Run type check
-        run: npm run typecheck
-
-      - name: Build
-        run: npm run build
-
-      - name: Run tests
-        run: npm test
-
   build-and-push:
     name: 🐳 Build & Push
     runs-on: ubuntu-latest
-    needs: test
+    # Only run if triggered by workflow_dispatch OR if tests workflow succeeded on a tag
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.head_branch, 'v'))
     permissions:
       contents: read
       packages: write
@@ -55,6 +30,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -75,10 +52,10 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=semver,pattern={{version}},value=${{ github.event.workflow_run.head_branch || github.ref_name }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ github.event.workflow_run.head_branch || github.ref_name }}
+            type=semver,pattern={{major}},value=${{ github.event.workflow_run.head_branch || github.ref_name }}
+            type=raw,value=latest,enable=${{ github.event.workflow_run.head_branch == 'main' || github.ref_name == 'main' }}
             type=raw,value=${{ github.event.inputs.tag }},enable=${{ github.event_name == 'workflow_dispatch' }}
 
       - name: Build and push Docker image
