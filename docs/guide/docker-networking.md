@@ -1,5 +1,7 @@
 # Docker Networking
 
+When running the PDF service in Docker, you may need to access URLs on your host machine or local network. This guide covers common networking scenarios.
+
 ## Access Host Machine from Container
 
 Use `host.docker.internal` to access services on your host:
@@ -10,6 +12,10 @@ Use `host.docker.internal` to access services on your host:
   "url": "http://host.docker.internal:8080/my-page"
 }
 ```
+
+::: tip
+`host.docker.internal` works on **macOS** and **Windows**. For Linux, see the [Linux Host Access](#linux-host-access) section.
+:::
 
 ## Access Other Containers
 
@@ -65,4 +71,163 @@ services:
 networks:
   my-network:
     external: true
+```
+
+## Local Domain Names (.test, .local, .dev)
+
+If you use local domain names like `myapp.test` or `localhost.test` configured via `/etc/hosts` or local DNS (dnsmasq, etc.), the Docker container cannot resolve them by default.
+
+### Solution 1: Use host.docker.internal (Recommended)
+
+Replace your local domain with `host.docker.internal`:
+
+```bash
+# Instead of
+http://myapp.test:3000
+
+# Use
+http://host.docker.internal:3000
+```
+
+### Solution 2: Add extra_hosts in Docker Compose
+
+Map your local domain to the host gateway:
+
+```yaml
+services:
+  chromium-pdf-service:
+    image: relliv/chromium-pdf-service:latest
+    extra_hosts:
+      - "myapp.test:host-gateway"
+      - "localhost.test:host-gateway"
+```
+
+### Solution 3: Use Your Machine's IP Address
+
+Find your local IP and use it directly:
+
+```bash
+# macOS/Linux
+ifconfig | grep "inet " | grep -v 127.0.0.1
+
+# Windows
+ipconfig | findstr /i "IPv4"
+```
+
+Then use the IP in your requests:
+
+```json
+{
+  "requestedKey": "local-page",
+  "url": "http://192.168.1.100:3000/my-page"
+}
+```
+
+### Solution 4: Custom DNS Configuration
+
+If you have a local DNS server, configure Docker to use it:
+
+```yaml
+services:
+  chromium-pdf-service:
+    image: relliv/chromium-pdf-service:latest
+    dns:
+      - 192.168.1.1  # Your router/DNS server
+    extra_hosts:
+      - "myapp.test:host-gateway"
+```
+
+## Linux Host Access
+
+On Linux, `host.docker.internal` may not work by default. Use one of these approaches:
+
+### Option 1: Add host-gateway (Docker 20.10+)
+
+```yaml
+services:
+  chromium-pdf-service:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+```
+
+### Option 2: Use --network host
+
+```bash
+docker run --network host relliv/chromium-pdf-service:latest
+```
+
+::: warning
+Using `--network host` disables network isolation. The container shares the host's network stack.
+:::
+
+### Option 3: Use Host IP Directly
+
+```bash
+# Get your host IP
+hostname -I | awk '{print $1}'
+
+# Use in requests
+http://172.17.0.1:8080/my-page  # Default Docker bridge gateway
+```
+
+## Playground Configuration
+
+When using the [Playground](/development/playground) with a containerized PDF service:
+
+1. **Service running in Docker, Playground on host:**
+   - Set Server URL to `http://localhost:4500` (mapped port)
+
+2. **Both running in Docker:**
+   - Use container service name: `http://chromium-pdf-service:3000`
+
+3. **Playground accessing local development sites:**
+   - Use `host.docker.internal` instead of `localhost`
+   - Or add `extra_hosts` mapping for your local domains
+
+### Example: Local Development Setup
+
+```yaml
+# docker-compose.yml
+services:
+  chromium-pdf-service:
+    image: relliv/chromium-pdf-service:latest
+    ports:
+      - "4500:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "myapp.test:host-gateway"
+      - "api.local:host-gateway"
+```
+
+## Troubleshooting
+
+### Container can't resolve hostname
+
+```bash
+# Test DNS resolution inside container
+docker exec -it <container_id> nslookup myapp.test
+
+# If it fails, use extra_hosts or direct IP
+```
+
+### Connection refused
+
+1. Ensure the target service is running
+2. Check if the port is exposed
+3. Verify firewall settings allow Docker connections
+
+### Timeout errors
+
+1. Check if the URL is accessible from host first
+2. Verify network connectivity between containers
+3. Increase timeout in browser options:
+
+```json
+{
+  "options": {
+    "browser": {
+      "timeout": 60000
+    }
+  }
+}
 ```
