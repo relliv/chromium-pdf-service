@@ -114,7 +114,7 @@ export async function screenshotRoutes(app: FastifyInstance): Promise<void> {
       if (error instanceof ZodError) {
         return reply.status(400).send({
           error: 'Validation failed',
-          details: error.errors,
+          details: error.issues,
         });
       }
 
@@ -212,7 +212,7 @@ export async function screenshotRoutes(app: FastifyInstance): Promise<void> {
       if (error instanceof ZodError) {
         return reply.status(400).send({
           error: 'Validation failed',
-          details: error.errors,
+          details: error.issues,
         });
       }
 

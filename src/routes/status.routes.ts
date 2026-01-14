@@ -66,7 +66,7 @@ export async function statusRoutes(app: FastifyInstance): Promise<void> {
         if (error instanceof ZodError) {
           return reply.status(400).send({
             error: 'Validation failed',
-            details: error.errors,
+            details: error.issues,
           });
         }
         throw error;
@@ -155,7 +155,7 @@ export async function statusRoutes(app: FastifyInstance): Promise<void> {
         if (error instanceof ZodError) {
           return reply.status(400).send({
             error: 'Validation failed',
-            details: error.errors,
+            details: error.issues,
           });
         }
         throw error;
@@ -252,7 +252,7 @@ export async function statusRoutes(app: FastifyInstance): Promise<void> {
         if (error instanceof ZodError) {
           return reply.status(400).send({
             error: 'Validation failed',
-            details: error.errors,
+            details: error.issues,
           });
         }
         throw error;

@@ -35,7 +35,7 @@ describe('Error Handler', () => {
     expect(mockReply.status).toHaveBeenCalledWith(400);
     expect(mockReply.send).toHaveBeenCalledWith({
       error: 'Validation failed',
-      details: zodError.errors,
+      details: zodError.issues,
     });
   });
 

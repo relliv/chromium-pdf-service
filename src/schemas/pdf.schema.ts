@@ -10,7 +10,7 @@ export const browserOptionsSchema = z.object({
     })
     .optional(),
   userAgent: z.string().max(500).optional(),
-  extraHTTPHeaders: z.record(z.string()).optional(),
+  extraHTTPHeaders: z.record(z.string(), z.string()).optional(),
   waitForSelector: z.string().min(1).max(500).optional(), // CSS selector to wait for
   waitAfter: z.number().int().min(0).max(60000).optional(), // Wait time in ms (max 60s)
   disableAnimations: z.boolean().optional(), // Disable all CSS animations and transitions
