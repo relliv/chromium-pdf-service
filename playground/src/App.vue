@@ -4,7 +4,8 @@ import axios from 'axios'
 import OptionsPanel from './components/OptionsPanel.vue'
 import HttpOptions from './components/HttpOptions.vue'
 
-const STORAGE_KEY = 'pdf-playground-server'
+const STORAGE_KEY_SERVER = 'pdf-playground-server'
+const STORAGE_KEY_STATE = 'pdf-playground-state'
 const POLL_INTERVAL = 500
 
 type ConversionType = 'html' | 'url'
@@ -50,16 +51,52 @@ const generateRequestedKey = () => {
   return `playground-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
 
+const saveState = () => {
+  localStorage.setItem(
+    STORAGE_KEY_STATE,
+    JSON.stringify({
+      conversionType: conversionType.value,
+      outputFormat: outputFormat.value,
+      htmlContent: htmlContent.value,
+      urlInput: urlInput.value,
+      showOptions: showOptions.value,
+    })
+  )
+}
+
+const loadState = () => {
+  const saved = localStorage.getItem(STORAGE_KEY_STATE)
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved)
+      if (parsed.conversionType) conversionType.value = parsed.conversionType
+      if (parsed.outputFormat) outputFormat.value = parsed.outputFormat
+      if (parsed.htmlContent) htmlContent.value = parsed.htmlContent
+      if (parsed.urlInput) urlInput.value = parsed.urlInput
+      if (parsed.showOptions !== undefined) showOptions.value = parsed.showOptions
+    } catch {
+      // ignore
+    }
+  }
+}
+
 watch(serverUrl, (val) => {
-  localStorage.setItem(STORAGE_KEY, val)
+  localStorage.setItem(STORAGE_KEY_SERVER, val)
 })
 
+watch([conversionType, outputFormat, htmlContent, urlInput, showOptions], saveState)
+
 onMounted(() => {
-  const saved = localStorage.getItem(STORAGE_KEY)
-  if (saved) {
-    serverUrl.value = saved
+  // Load server URL
+  const savedServer = localStorage.getItem(STORAGE_KEY_SERVER)
+  if (savedServer) {
+    serverUrl.value = savedServer
   }
 
+  // Load app state
+  loadState()
+
+  // Theme detection
   isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
     isDark.value = e.matches
