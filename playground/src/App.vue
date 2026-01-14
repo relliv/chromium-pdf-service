@@ -2,6 +2,7 @@
 import { ref, watch, onMounted } from 'vue'
 import axios from 'axios'
 import OptionsPanel from './components/OptionsPanel.vue'
+import HttpOptions from './components/HttpOptions.vue'
 
 const STORAGE_KEY = 'pdf-playground-server'
 const POLL_INTERVAL = 500
@@ -41,6 +42,7 @@ const isDark = ref(false)
 const jobState = ref<JobState | null>(null)
 const showOptions = ref(false)
 const optionsPanelRef = ref<InstanceType<typeof OptionsPanel> | null>(null)
+const httpOptionsRef = ref<InstanceType<typeof HttpOptions> | null>(null)
 
 const baseUrl = () => serverUrl.value.replace(/\/$/, '')
 
@@ -117,6 +119,14 @@ const generateOutput = async () => {
     const endpoint = `${baseUrl()}${path}`
 
     const options = optionsPanelRef.value?.buildRequestOptions() ?? {}
+    const httpOptions = httpOptionsRef.value?.buildHttpOptions() ?? {}
+
+    // Merge HTTP options into browser options
+    if (Object.keys(httpOptions).length > 0) {
+      const existingBrowser = (options.browser as Record<string, unknown>) ?? {}
+      options.browser = { ...existingBrowser, ...httpOptions }
+    }
+
     const payload =
       conversionType.value === 'html'
         ? { requestedKey, html: htmlContent.value, reCreate: true, options }
@@ -226,6 +236,7 @@ const generateOutput = async () => {
           Options
         </button>
         <OptionsPanel v-show="showOptions" ref="optionsPanelRef" :output-format="outputFormat" />
+        <HttpOptions v-show="showOptions" ref="httpOptionsRef" />
       </section>
 
       <button class="generate-btn" @click="generateOutput" :disabled="isLoading">
