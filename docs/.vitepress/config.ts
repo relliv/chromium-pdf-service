@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress';
 
 export default defineConfig({
   title: 'Chromium PDF Service',
-  description: 'A PDF generation service built with Fastify, TypeScript, Playwright, and Docker',
+  description: 'A PDF and screenshot generation service built with Fastify, TypeScript, Playwright, and Docker',
   base: '/chromium-pdf-service/',
 
   head: [['link', { rel: 'icon', type: 'image/svg+xml', href: 'https://fav.farm/📜' }]],
@@ -49,6 +49,7 @@ export default defineConfig({
             { text: 'Examples', link: '/api/examples' },
             { text: 'Browser Options', link: '/api/browser-options' },
             { text: 'PDF Options', link: '/api/pdf-options' },
+            { text: 'Screenshot Options', link: '/api/screenshot-options' },
             { text: 'Queue Options', link: '/api/queue-options' },
           ],
         },

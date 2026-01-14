@@ -140,6 +140,130 @@ requestedKey: report-001
 options: {"pdf": {"format": "Letter"}}
 ```
 
+## Screenshot Generation
+
+### Generate Screenshot from HTML
+
+```bash
+POST /api/screenshot/from-html
+Content-Type: application/json
+```
+
+```json
+{
+  "requestedKey": "page-capture-001",
+  "html": "<html><body><h1>Hello World</h1></body></html>",
+  "options": {
+    "screenshot": {
+      "type": "png",
+      "fullPage": true
+    }
+  }
+}
+```
+
+### Generate Screenshot from URL
+
+```bash
+POST /api/screenshot/from-url
+Content-Type: application/json
+```
+
+```json
+{
+  "requestedKey": "website-screenshot",
+  "url": "https://example.com",
+  "options": {
+    "browser": {
+      "viewport": { "width": 1920, "height": 1080 }
+    },
+    "screenshot": {
+      "type": "png",
+      "fullPage": true
+    }
+  }
+}
+```
+
+### Generate JPEG Screenshot with Quality
+
+```json
+{
+  "requestedKey": "compressed-screenshot",
+  "url": "https://example.com",
+  "options": {
+    "screenshot": {
+      "type": "jpeg",
+      "quality": 80,
+      "fullPage": true
+    }
+  }
+}
+```
+
+### Capture Specific Region
+
+```json
+{
+  "requestedKey": "region-capture",
+  "url": "https://example.com",
+  "options": {
+    "screenshot": {
+      "type": "png",
+      "fullPage": false,
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 800,
+        "height": 600
+      }
+    }
+  }
+}
+```
+
+::: tip
+Use `clip` to capture a specific region of the page. When using `clip`, set `fullPage` to `false`.
+:::
+
+### Transparent Background (PNG only)
+
+```json
+{
+  "requestedKey": "transparent-screenshot",
+  "html": "<html><body style='background: transparent;'><h1>Hello</h1></body></html>",
+  "options": {
+    "screenshot": {
+      "type": "png",
+      "omitBackground": true
+    }
+  }
+}
+```
+
+### Generate Screenshot from File
+
+```bash
+POST /api/screenshot/from-file
+Content-Type: multipart/form-data
+
+file: <HTML file>
+requestedKey: screenshot-001
+options: {"screenshot": {"type": "png", "fullPage": true}}
+```
+
+### Get Screenshot Job Status
+
+```bash
+GET /api/screenshot/status/:requestedKey
+```
+
+### Cancel/Remove Screenshot Job
+
+```bash
+DELETE /api/screenshot/:requestedKey
+```
+
 ## Job Management
 
 ### Get Job Status

@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: Chromium PDF Service
-  text: PDF Generation Made Simple
-  tagline: Generate PDFs from HTML, URLs, or files with Fastify, Playwright, and Docker
+  text: PDF & Screenshot Generation Made Simple
+  tagline: Generate PDFs and screenshots from HTML, URLs, or files with Fastify, Playwright, and Docker
   actions:
     - theme: brand
       text: Get Started
@@ -17,6 +17,9 @@ features:
   - icon: 📄
     title: Multiple Input Sources
     details: Generate PDFs from HTML content, URLs, or uploaded HTML files
+  - icon: 📸
+    title: Screenshot Generation
+    details: Capture PNG/JPEG screenshots with full-page, viewport, or region options
   - icon: 📋
     title: Queue System
     details: Built-in job queue with priority support, status tracking, and cancellation
@@ -32,7 +35,7 @@ features:
   - icon: 🎬
     title: Disable Animations
     details: Option to disable CSS animations for reliable PDF rendering
-  - icon: 📸
+  - icon: 🐛
     title: Error Screenshots
     details: Captures page screenshot on failure for debugging
   - icon: 🐳
