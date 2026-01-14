@@ -68,6 +68,7 @@ export default defineConfig({
           text: 'Development',
           items: [
             { text: 'Getting Started', link: '/development/' },
+            { text: 'Playground App', link: '/development/playground' },
             { text: 'Docker Build & Test', link: '/development/docker-build' },
           ],
         },

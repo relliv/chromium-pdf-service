@@ -72,11 +72,13 @@ chromium-pdf-service/
 │   │   └── default-settings.ts
 │   ├── routes/
 │   │   ├── pdf.routes.ts     # PDF generation endpoints
+│   │   ├── screenshot.routes.ts  # Screenshot endpoints
 │   │   ├── status.routes.ts  # Job status endpoints
 │   │   ├── health.routes.ts  # Health check endpoints
 │   │   └── settings.routes.ts
 │   ├── services/
 │   │   ├── pdf-generator.ts  # Core PDF generation
+│   │   ├── screenshot-generator.ts  # Screenshot generation
 │   │   ├── queue-manager.ts  # Job queue management
 │   │   └── settings-manager.ts
 │   ├── middleware/
@@ -91,8 +93,9 @@ chromium-pdf-service/
 │       └── html-sanitizer.ts
 ├── tests/                    # Test files
 ├── docs/                     # VitePress documentation
+├── playground/               # Vue.js playground app
 ├── data/                     # Runtime data (settings, queue)
-├── pdf-files/                # Generated PDFs
+├── pdf-files/                # Generated PDFs/screenshots
 └── logs/                     # Log files
 ```
 
