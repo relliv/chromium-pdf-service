@@ -10,6 +10,7 @@ interface BrowserOptions {
   waitAfter: number
   waitForSelector: string
   disableAnimations: boolean
+  colorScheme: 'light' | 'dark' | 'no-preference' | ''
 }
 
 interface PdfOptions {
@@ -43,6 +44,7 @@ const defaultBrowserOptions: BrowserOptions = {
   waitAfter: 0,
   waitForSelector: '',
   disableAnimations: false,
+  colorScheme: '',
 }
 
 const defaultPdfOptions: PdfOptions = {
@@ -112,6 +114,7 @@ const buildRequestOptions = () => {
       ...(browserOptions.waitAfter > 0 && { waitAfter: browserOptions.waitAfter }),
       ...(browserOptions.waitForSelector && { waitForSelector: browserOptions.waitForSelector }),
       ...(browserOptions.disableAnimations && { disableAnimations: true }),
+      ...(browserOptions.colorScheme && { colorScheme: browserOptions.colorScheme }),
     },
   }
 
@@ -176,6 +179,15 @@ defineExpose({
           <input type="checkbox" v-model="browserOptions.disableAnimations" />
           Disable Animations
         </label>
+      </div>
+      <div class="option-field">
+        <label>Color Scheme</label>
+        <select v-model="browserOptions.colorScheme">
+          <option value="">Default</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="no-preference">No Preference</option>
+        </select>
       </div>
     </div>
 
