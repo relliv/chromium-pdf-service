@@ -216,89 +216,101 @@ const generateOutput = async () => {
     </header>
 
     <main>
-      <section class="server-section">
-        <label>Server URL</label>
-        <input
-          v-model="serverUrl"
-          type="url"
-          placeholder="http://localhost:3000"
-          class="server-input"
-        />
-      </section>
+      <div class="main-layout">
+        <div class="left-panel">
+          <section class="server-section">
+            <label>Server URL</label>
+            <input
+              v-model="serverUrl"
+              type="url"
+              placeholder="http://localhost:3000"
+              class="server-input"
+            />
+          </section>
 
-      <section class="controls">
-        <div class="control-group">
-          <label>Source</label>
-          <div class="button-group">
-            <button :class="{ active: conversionType === 'html' }" @click="conversionType = 'html'">
-              HTML
+          <section class="controls">
+            <div class="control-group">
+              <label>Source</label>
+              <div class="button-group">
+                <button :class="{ active: conversionType === 'html' }" @click="conversionType = 'html'">
+                  HTML
+                </button>
+                <button :class="{ active: conversionType === 'url' }" @click="conversionType = 'url'">
+                  URL
+                </button>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label>Output</label>
+              <div class="button-group">
+                <button :class="{ active: outputFormat === 'pdf' }" @click="outputFormat = 'pdf'">
+                  PDF
+                </button>
+                <button
+                  :class="{ active: outputFormat === 'screenshot' }"
+                  @click="outputFormat = 'screenshot'"
+                >
+                  Screenshot
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="input-section">
+            <div v-if="conversionType === 'html'" class="input-wrapper">
+              <label>HTML Content</label>
+              <textarea v-model="htmlContent" placeholder="Enter HTML content..." />
+            </div>
+
+            <div v-else class="input-wrapper">
+              <label>URL</label>
+              <input v-model="urlInput" type="url" placeholder="https://example.com" />
+            </div>
+          </section>
+
+          <section class="options-section">
+            <button class="options-toggle" @click="showOptions = !showOptions">
+              <span class="options-toggle-icon">{{ showOptions ? '▼' : '▶' }}</span>
+              Options
             </button>
-            <button :class="{ active: conversionType === 'url' }" @click="conversionType = 'url'">
-              URL
-            </button>
+            <OptionsPanel v-show="showOptions" ref="optionsPanelRef" :output-format="outputFormat" />
+            <HttpOptions v-show="showOptions" ref="httpOptionsRef" />
+          </section>
+
+          <button class="generate-btn" @click="generateOutput" :disabled="isLoading">
+            <span v-if="isLoading" class="spinner"></span>
+            {{ isLoading ? 'Generating...' : `Generate ${outputFormat.toUpperCase()}` }}
+          </button>
+
+          <div v-if="isLoading && jobState" class="status">
+            <span class="status-label">Status:</span>
+            <span :class="['status-value', jobState.status]">{{ jobState.status }}</span>
+            <span v-if="jobState.requestedKey" class="status-key">{{ jobState.requestedKey }}</span>
           </div>
+
+          <div v-if="error" class="error">{{ error }}</div>
         </div>
 
-        <div class="control-group">
-          <label>Output</label>
-          <div class="button-group">
-            <button :class="{ active: outputFormat === 'pdf' }" @click="outputFormat = 'pdf'">
-              PDF
-            </button>
-            <button
-              :class="{ active: outputFormat === 'screenshot' }"
-              @click="outputFormat = 'screenshot'"
-            >
-              Screenshot
-            </button>
-          </div>
+        <div class="right-panel">
+          <section class="result" :class="{ 'has-result': result }">
+            <div v-if="result">
+              <div class="result-header">
+                <h2>Result</h2>
+                <a :href="result.url" :download="`output.${result.type === 'pdf' ? 'pdf' : 'png'}`" class="download-btn">
+                  Download
+                </a>
+              </div>
+              <iframe v-if="result.type === 'pdf'" :src="result.url" class="preview-frame" />
+              <img v-else :src="result.url" class="preview-image" alt="Screenshot result" />
+            </div>
+            <div v-else class="result-placeholder">
+              <div class="placeholder-icon">📄</div>
+              <p>Generated PDF or screenshot will appear here</p>
+            </div>
+          </section>
         </div>
-      </section>
-
-      <section class="input-section">
-        <div v-if="conversionType === 'html'" class="input-wrapper">
-          <label>HTML Content</label>
-          <textarea v-model="htmlContent" placeholder="Enter HTML content..." />
-        </div>
-
-        <div v-else class="input-wrapper">
-          <label>URL</label>
-          <input v-model="urlInput" type="url" placeholder="https://example.com" />
-        </div>
-      </section>
-
-      <section class="options-section">
-        <button class="options-toggle" @click="showOptions = !showOptions">
-          <span class="options-toggle-icon">{{ showOptions ? '▼' : '▶' }}</span>
-          Options
-        </button>
-        <OptionsPanel v-show="showOptions" ref="optionsPanelRef" :output-format="outputFormat" />
-        <HttpOptions v-show="showOptions" ref="httpOptionsRef" />
-      </section>
-
-      <button class="generate-btn" @click="generateOutput" :disabled="isLoading">
-        <span v-if="isLoading" class="spinner"></span>
-        {{ isLoading ? 'Generating...' : `Generate ${outputFormat.toUpperCase()}` }}
-      </button>
-
-      <div v-if="isLoading && jobState" class="status">
-        <span class="status-label">Status:</span>
-        <span :class="['status-value', jobState.status]">{{ jobState.status }}</span>
-        <span v-if="jobState.requestedKey" class="status-key">{{ jobState.requestedKey }}</span>
       </div>
-
-      <div v-if="error" class="error">{{ error }}</div>
-
-      <section v-if="result" class="result">
-        <div class="result-header">
-          <h2>Result</h2>
-          <a :href="result.url" :download="`output.${result.type === 'pdf' ? 'pdf' : 'png'}`" class="download-btn">
-            Download
-          </a>
-        </div>
-        <iframe v-if="result.type === 'pdf'" :src="result.url" class="preview-frame" />
-        <img v-else :src="result.url" class="preview-image" alt="Screenshot result" />
-      </section>
     </main>
   </div>
 </template>
@@ -369,9 +381,26 @@ header h1 {
 }
 
 main {
-  max-width: 800px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 2rem;
+}
+
+.main-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.left-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.right-panel {
+  position: sticky;
+  top: 2rem;
 }
 
 .server-section {
@@ -598,7 +627,35 @@ input:focus {
 }
 
 .result {
-  margin-top: 2rem;
+  min-height: 400px;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+}
+
+.result.has-result {
+  padding: 1.5rem;
+}
+
+.result-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 350px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.placeholder-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.result-placeholder p {
+  font-size: 0.9375rem;
 }
 
 .result-header {
@@ -640,6 +697,16 @@ input:focus {
   max-width: 100%;
   border: 1px solid var(--border);
   border-radius: 8px;
+}
+
+@media (max-width: 1024px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .right-panel {
+    position: static;
+  }
 }
 
 @media (max-width: 600px) {
