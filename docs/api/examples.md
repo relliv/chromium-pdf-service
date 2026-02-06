@@ -77,11 +77,6 @@ curl -X POST http://localhost:3000/api/pdf/from-url \
       "browser": {
         "viewport": { "width": 1920, "height": 1080 },
         "timeout": 30000
-      },
-      "pdf": {
-        "format": "A4",
-        "printBackground": true,
-        "landscape": true
       }
     }
   }'
