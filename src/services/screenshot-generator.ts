@@ -17,7 +17,10 @@ class ScreenshotGenerator {
   constructor() {
     screenshotQueueManager.on('process', (job: QueuedScreenshotJob) => {
       this.processJob(job).catch((err) => {
-        logger.error({ error: err, requestedKey: job.requestedKey }, 'Failed to process screenshot job');
+        logger.error(
+          { error: err, requestedKey: job.requestedKey },
+          'Failed to process screenshot job'
+        );
       });
     });
   }
@@ -115,7 +118,10 @@ class ScreenshotGenerator {
     screenshotQueueManager.triggerProcessing();
   }
 
-  private async generateScreenshotWithTimeout(job: ScreenshotJob, timeoutMs: number): Promise<string> {
+  private async generateScreenshotWithTimeout(
+    job: ScreenshotJob,
+    timeoutMs: number
+  ): Promise<string> {
     return Promise.race([
       this.generateScreenshot(job),
       new Promise<never>((_, reject) => {
@@ -125,7 +131,6 @@ class ScreenshotGenerator {
   }
 
   private async generateScreenshot(job: ScreenshotJob): Promise<string> {
-    const browser = await this.ensureBrowser();
     const settings = settingsManager.get();
 
     const browserOptions: BrowserOptions = {
@@ -140,7 +145,17 @@ class ScreenshotGenerator {
       waitAfter: job.options.browser.waitAfter,
       disableAnimations: job.options.browser.disableAnimations,
       colorScheme: job.options.browser.colorScheme,
+      launchOptions: job.options.browser.launchOptions,
     };
+
+    // Use a dedicated browser instance if custom launch options are provided
+    const useCustomBrowser = !!browserOptions.launchOptions;
+    const browser = useCustomBrowser
+      ? await chromium.launch({
+          headless: browserOptions.launchOptions?.headless ?? settings.browser.launchOptions.headless,
+          args: browserOptions.launchOptions?.args ?? settings.browser.launchOptions.args,
+        })
+      : await this.ensureBrowser();
 
     const screenshotOptions: ScreenshotOptions = {
       type: job.options.screenshot.type ?? 'png',
@@ -272,12 +287,19 @@ class ScreenshotGenerator {
 
       screenshotQueueManager.updateJobProgress(job.requestedKey, 100);
 
-      logger.info({ requestedKey: job.requestedKey, filePath }, 'Screenshot generated successfully');
+      logger.info(
+        { requestedKey: job.requestedKey, filePath },
+        'Screenshot generated successfully'
+      );
 
       return filePath;
     } finally {
       await page.close();
       await context.close();
+      // Close the custom browser if one was created for this job
+      if (useCustomBrowser && browser) {
+        await browser.close();
+      }
     }
   }
 

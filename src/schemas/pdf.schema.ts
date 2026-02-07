@@ -15,6 +15,12 @@ export const browserOptionsSchema = z.object({
   waitAfter: z.number().int().min(0).max(60000).optional(), // Wait time in ms (max 60s)
   disableAnimations: z.boolean().optional(), // Disable all CSS animations and transitions
   colorScheme: z.enum(['light', 'dark', 'no-preference']).optional(), // Emulate prefers-color-scheme
+  launchOptions: z
+    .object({
+      headless: z.boolean().optional(),
+      args: z.array(z.string().max(500)).max(50).optional(), // Max 50 args, each max 500 chars
+    })
+    .optional(),
 });
 
 // PDF dimension value (can be number in pixels or string with unit)

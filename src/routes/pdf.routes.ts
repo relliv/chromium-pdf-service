@@ -48,7 +48,34 @@ export async function pdfRoutes(app: FastifyInstance): Promise<void> {
           options: {
             type: 'object',
             properties: {
-              browser: { type: 'object', description: 'Browser options' },
+              browser: {
+                type: 'object',
+                description: 'Browser options',
+                properties: {
+                  timeout: { type: 'number' },
+                  viewport: {
+                    type: 'object',
+                    properties: {
+                      width: { type: 'number' },
+                      height: { type: 'number' },
+                    },
+                  },
+                  userAgent: { type: 'string' },
+                  extraHTTPHeaders: { type: 'object' },
+                  waitForSelector: { type: 'string' },
+                  waitAfter: { type: 'number' },
+                  disableAnimations: { type: 'boolean' },
+                  colorScheme: { type: 'string', enum: ['light', 'dark', 'no-preference'] },
+                  launchOptions: {
+                    type: 'object',
+                    description: 'Browser launch options',
+                    properties: {
+                      headless: { type: 'boolean' },
+                      args: { type: 'array', items: { type: 'string' } },
+                    },
+                  },
+                },
+              },
               pdf: { type: 'object', description: 'PDF options' },
               queue: { type: 'object', properties: { priority: { type: 'number' } } },
             },
@@ -147,7 +174,34 @@ export async function pdfRoutes(app: FastifyInstance): Promise<void> {
           options: {
             type: 'object',
             properties: {
-              browser: { type: 'object', description: 'Browser options' },
+              browser: {
+                type: 'object',
+                description: 'Browser options',
+                properties: {
+                  timeout: { type: 'number' },
+                  viewport: {
+                    type: 'object',
+                    properties: {
+                      width: { type: 'number' },
+                      height: { type: 'number' },
+                    },
+                  },
+                  userAgent: { type: 'string' },
+                  extraHTTPHeaders: { type: 'object' },
+                  waitForSelector: { type: 'string' },
+                  waitAfter: { type: 'number' },
+                  disableAnimations: { type: 'boolean' },
+                  colorScheme: { type: 'string', enum: ['light', 'dark', 'no-preference'] },
+                  launchOptions: {
+                    type: 'object',
+                    description: 'Browser launch options',
+                    properties: {
+                      headless: { type: 'boolean' },
+                      args: { type: 'array', items: { type: 'string' } },
+                    },
+                  },
+                },
+              },
               pdf: { type: 'object', description: 'PDF options' },
               queue: { type: 'object', properties: { priority: { type: 'number' } } },
             },

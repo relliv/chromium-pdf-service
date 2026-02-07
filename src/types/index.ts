@@ -19,6 +19,10 @@ export interface BrowserOptions {
   waitAfter?: number; // Additional wait time (ms) after page load or selector appears
   disableAnimations?: boolean; // Disable all CSS animations and transitions
   colorScheme?: 'light' | 'dark' | 'no-preference'; // Emulate prefers-color-scheme media feature
+  launchOptions?: {
+    headless?: boolean;
+    args?: string[];
+  };
 }
 
 // PDF Options
